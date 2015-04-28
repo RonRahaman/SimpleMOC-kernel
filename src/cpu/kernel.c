@@ -1,9 +1,10 @@
 #include "SimpleMOC-kernel_header.h"
 
-void run_kernel( Input * I, Source * S, Table * table)
+void run_kernel( Input * I, Source * S, Table * table, 
+		float * state_flux_vals, int * QSR_vals, int * FAI_vals)
 {
 	// Enter Parallel Region
-	#pragma omp parallel default(none) shared(I, S, table)
+	#pragma omp parallel default(none) shared(I, S, table, state_flux_vals, QSR_vals, FAI_vals)
 	{
 		#ifdef OPENMP
 		int thread = omp_get_thread_num();
@@ -27,7 +28,13 @@ void run_kernel( Input * I, Source * S, Table * table)
 
 		// Allocate Thread Local Flux Vector
 		for( int i = 0; i < I->egroups; i++ )
+		{
+#ifdef VERIFY
+			state_flux[i] = state_flux_vals[i];
+#else
 			state_flux[i] = rand_r(&seed) / RAND_MAX;
+#endif
+		}
 
 		// Initialize PAPI Counters (if enabled)
 		#ifdef PAPI
@@ -43,11 +50,18 @@ void run_kernel( Input * I, Source * S, Table * table)
 		#pragma omp for schedule(dynamic,100)
 		for( long i = 0; i < I->segments; i++ )
 		{
+
+#ifdef VERIFY
+			// Pick Random QSR
+			int QSR_id = QSR_vals[i];
+			// Pick Random Fine Axial Interval
+			int FAI_id = FAI_vals[i];
+#else
 			// Pick Random QSR
 			int QSR_id = rand_r(&seed) % I->source_regions;
-
 			// Pick Random Fine Axial Interval
 			int FAI_id = rand_r(&seed) % I->fine_axial_intervals;
+#endif
 
 			// Attenuate Segment
 			attenuate_segment( I, S, QSR_id, FAI_id, state_flux,
@@ -237,7 +251,7 @@ void attenuate_segment( Input * restrict I, Source * restrict S,
 	#ifdef INTEL
 	#pragma vector aligned
 	#elif defined IBM
-	#pragma vector_level(10)
+	I->#pragma vector_level(10)
 	#endif
 	for( int g = 0; g < egroups; g++)
 	{

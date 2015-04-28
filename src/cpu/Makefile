@@ -4,10 +4,11 @@
 
 COMPILER    = intel
 OPENMP      = yes
-OPTIMIZE    = yes
+OPTIMIZE    = no
 DEBUG       = yes
 PROFILE     = no
 PAPI        = no
+VERIFY      = yes
 MIC         = no
 
 #===============================================================================
@@ -21,6 +22,7 @@ main.c \
 kernel.c \
 init.c \
 io.c \
+verify.c \
 papi.c
 
 obj = $(source:.c=.o)
@@ -50,7 +52,7 @@ ifeq ($(MACHINE),bluegene)
 endif
 
 # Standard Flags
-CFLAGS := -std=gnu99
+CFLAGS := -std=gnu99 -Wall
 
 # Linker Flags
 LDFLAGS = -lm
@@ -63,6 +65,11 @@ endif
 # Profiling Flags
 ifeq ($(PROFILE),yes)
   CFLAGS += -pg
+endif
+
+# Verification flags
+ifeq ($(VERIFY),yes)
+  CFLAGS += -DVERIFY
 endif
 
 # MIC Flags

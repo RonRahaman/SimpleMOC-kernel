@@ -72,6 +72,40 @@ Source * initialize_sources( Input * I )
 	return sources;
 }
 
+float * initialize_state_flux_vals(Input * I)
+{
+	float * data = NULL;
+#ifdef VERIFY
+	data = (float *) malloc(I->egroups * sizeof(float));
+	for (int i = 0; i < I->egroups; i++)
+		data[i] = rand();
+#endif
+	return data;
+}
+
+int * initialize_QSR_vals(Input * I)
+{
+	int * data = NULL;
+#ifdef VERIFY
+	data = (int *) malloc(I->segments * sizeof(int));
+	for (int i = 0; i < I->segments; i++)
+		data[i] = rand() % I->source_regions;
+#endif
+	return data;
+}
+
+int * initialize_FAI_vals(Input * I)
+{
+	int * data = NULL;
+#ifdef VERIFY
+	data = (int *) malloc(I->segments * sizeof(int));
+	for (int i = 0; i < I->segments; i++)
+		data[i] = rand() % I->fine_axial_intervals;
+#endif
+	return data;
+}
+
+
 // Builds a table of exponential values for linear interpolation
 Table * buildExponentialTable( float precision, float maxVal )
 {

@@ -75,7 +75,7 @@ typedef struct{
 } SIMD_Vectors;
 
 // kernel.c
-void run_kernel( Input * I, Source * S, Table * table);
+void run_kernel( Input * I, Source * S, Table * table, float * state_flux_vals, int * QSR_vals, int * FSR_vals);
 void attenuate_segment( Input * restrict I, Source * restrict S,
 		int QSR_id, int FAI_id, float * restrict state_flux,
 		SIMD_Vectors * restrict simd_vecs, Table * restrict table); 
@@ -84,6 +84,9 @@ float interpolateTable( Table * table, float x);
 // init.c
 Source * aligned_initialize_sources( Input * I );
 Source * initialize_sources( Input * I );
+float * initialize_state_flux_vals(Input * I);
+int * initialize_QSR_vals(Input * I);
+int * initialize_FAI_vals(Input * I);
 Table * buildExponentialTable( float precision, float maxVal );
 Input * set_default_input( void );
 SIMD_Vectors aligned_allocate_simd_vectors(Input * I);
@@ -107,5 +110,9 @@ void read_input_file( Input * I, char * fname);
 void papi_serial_init(void);
 void counter_init( int *eventset, int *num_papi_events, Input * I );
 void counter_stop( int * eventset, int num_papi_events, Input * I );
+
+// verify.c
+unsigned long long verify_FSR_flux(Input * I, Source * S);
+unsigned int hash(unsigned char *str, int nbins);
 
 #endif
